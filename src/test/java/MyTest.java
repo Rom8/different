@@ -4,7 +4,6 @@ import sun.reflect.ReflectionFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 
@@ -42,5 +41,19 @@ public class MyTest {
                 .newConstructorForSerialization(ClassWithExpensiveConstructor.class, Object.class.getConstructor());
         silentConstructor.setAccessible(true);
         assertEquals(0, silentConstructor.newInstance().getValue());
+    }
+
+    @Test
+    public void testStrangeReflectionFactory() throws Exception {
+        @SuppressWarnings("unchecked")
+        Constructor<ClassWithExpensiveConstructor> silentConstructor =
+                (Constructor<ClassWithExpensiveConstructor>) ReflectionFactory.getReflectionFactory()
+                .newConstructorForSerialization(ClassWithExpensiveConstructor.class,
+                        OtherClass.class.getDeclaredConstructor());
+        silentConstructor.setAccessible(true);
+        ClassWithExpensiveConstructor instance = silentConstructor.newInstance();
+        assertEquals(10, instance.getValue());
+        assertEquals(ClassWithExpensiveConstructor.class, instance.getClass());
+        assertEquals(Object.class, instance.getClass().getSuperclass());
     }
 }
